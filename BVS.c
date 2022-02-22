@@ -64,9 +64,8 @@ struct node* search(struct node* root, int searchedNumber){
 }
 //Funkcia, ktora nam vrati rodica podla vstupnej hodnoty
 struct node* getParentNode(struct node* root, int value){
-    if(root->data==value){
+    if(root->data==value)
         return root;
-    }
     else{
         if(value<root->data){
             if(value==root->left->data)
@@ -85,12 +84,10 @@ struct node* getParentNode(struct node* root, int value){
 //Vymazeme hodnotu v strome podla vstupnej hodnoty
 void delete(struct node** root, int dataToDelete){
     //Rekurzivne prehladavame strom
-    if(dataToDelete<(*root)->data){
-        return delete(&((*root)->left),dataToDelete);
-    }
-    else if(dataToDelete>(*root)->data){
-        return delete(&((*root)->right),dataToDelete);
-    }
+    if(dataToDelete<(*root)->data)
+        delete(&((*root)->left),dataToDelete);    
+    else if(dataToDelete>(*root)->data)
+        delete(&((*root)->right),dataToDelete);
     else{
         //Ak najdeme hodnotu, ktoru chceme vymazat, musime pocitat so 4 moznostami
         struct node* parent = getParentNode((*root),dataToDelete);
@@ -108,11 +105,13 @@ void delete(struct node** root, int dataToDelete){
             }
         }
         //TODO:
-
-
-
-        
     }
+}
+//Funkcia na vratenie najmensej hodnoty pod vstupnou hodndotou
+struct node* minValue(struct node* searchedNode){
+    while(searchedNode && searchedNode->left !=NULL)
+        searchedNode=searchedNode->left;
+    return searchedNode;
 }
 int main(){
     int rootValue;
