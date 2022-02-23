@@ -1,7 +1,2 @@
 # binarySearchTree
-Základy binárneho stromu bez optimalizácie
--funkcia na vypisanie hodnot
--funkcia na uvolnenie pamate
--funkcia na vyhladanie prvku v binarnom strome
--funkcia na najdenie rodica prvku
--funkcia na najdenie najmensieho prvku
+Prvé zadanie na predmet Dátové štruktúry a algoritmy. V rámci tohto zadania je našou úlohou implementovať a následne porovnať 4 implementácie dátových štruktúr z hľadiska efektivity operácií insert, delete a search v rozličných situáciách
