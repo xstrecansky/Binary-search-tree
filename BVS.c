@@ -64,47 +64,33 @@ struct node* search(struct node* root, int searchedNumber){
 }
 //Funkcia, ktora nam vrati rodica podla vstupnej hodnoty
 struct node* getParentNode(struct node* root, int value){
-    if(root->data==value)
+    //ak hladany rodic je nasa zaciatocna hodnota
+    if(root==NULL || root->data==value)
         return root;
-    else{
-        if(value<root->data){
-            if(value==root->left->data)
-                return root;
-            else
-                getParentNode(root->left,value);
-        }
-        if(value>root->data){
-            if(value==root->right->data)
-                return root;
-            else
-                getParentNode(root->right, value);
-        }
+    if(((root->left!=NULL)&&(root->left->data==value))||((root->right!=NULL)&&(root->right->data==value))){
+        return root;
     }
+    struct node* parent = getParentNode(root->left, value);
+    if(parent!=NULL)
+        return parent;
+    parent = getParentNode(root->right, value);
+    return parent;
 }
 //Vymazeme hodnotu v strome podla vstupnej hodnoty
-void delete(struct node** root, int dataToDelete){
+void delete(struct node* root, int dataToDelete){
+    if (search(root, dataToDelete)==NULL)
+        return;
+    if(root==NULL)
+        return;
     //Rekurzivne prehladavame strom
-    if(dataToDelete<(*root)->data)
-        delete(&((*root)->left),dataToDelete);    
-    else if(dataToDelete>(*root)->data)
-        delete(&((*root)->right),dataToDelete);
+    if(dataToDelete<root->data)
+        delete(root->left,dataToDelete);    
+    else if(dataToDelete>root->data)
+        delete(root->right,dataToDelete);
     else{
         //Ak najdeme hodnotu, ktoru chceme vymazat, musime pocitat so 4 moznostami
-        struct node* parent = getParentNode((*root),dataToDelete);
-        //Pripad kedy vymazavame list
-        if((*root)->left==NULL && (*root)->right==NULL){
-            if(parent->data>(*root)->data){
-                parent->left=NULL;
-                free(*root);
-                return;
-            }
-            else{
-                parent->right=NULL;
-                free(*root);
-                return;
-            }
-        }
-        //TODO:
+        struct node* parent = getParentNode(root, dataToDelete);
+        printf("%d\n",parent->data);
     }
 }
 //Funkcia na vratenie najmensej hodnoty pod vstupnou hodndotou
@@ -117,6 +103,7 @@ int main(){
     int rootValue;
     int inputValue;
     int deleteValue;
+    int searchValue;
     int i=0,j=0;
     printf("Vloz hodnotu hlavicky binarneho stromu\n");
     scanf("%d",&rootValue);
@@ -136,15 +123,17 @@ int main(){
                         break;
                     case 2:
                         scanf("%d",&deleteValue);
-                        delete(&root, deleteValue);
-                        printf("Hodnota bola vymazana\n");
+                        struct node* parent = getParentNode(root, deleteValue);
+                        printf("%d\n",parent->data);
+                        //delete(root, deleteValue);
+                        //printf("Hodnota bola vymazana\n");
                         break;
                     case 3:
-                        scanf("%d",&deleteValue);
-                        if(search(root, deleteValue))
-                            printf("Hodnota %d sa nachadza v stome\n",deleteValue);
+                        scanf("%d",&searchValue);
+                        if(search(root, searchValue))
+                            printf("Hodnota %d sa nachadza v stome\n",searchValue);
                         else
-                            printf("Hodnota %d sa nenachadza v strome\n",deleteValue);
+                            printf("Hodnota %d sa nenachadza v strome\n",searchValue);
                         break;
                     case 4:
                         j=1;
