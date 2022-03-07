@@ -131,9 +131,32 @@ struct node* rotateRL(struct node* A){
     A->right = rightRotate(A->right);
     return leftRotate(A);
 }
-stuct node* rotateLR(struct node* A){
+struct node* rotateLR(struct node* A){
     A->left = leftRotate(A->left);
     return rightRotate(A);
+}
+//Funkcia nam vrati najdlhsiu vzdialenost od listu
+int getHeight(struct node* root, int height){
+    if(root==NULL)
+        return -1;
+    int leftHeight = getHeight(root->left, height);
+    int rightHeight = getHeight(root->right, height);
+    int answer =1;
+    if(leftHeight>rightHeight)
+        answer+=leftHeight;
+    else
+        answer+=rightHeight;
+    return answer;
+}
+int balance(struct node* root){
+    return getHeight(root->left,0)-getHeight(root->right,0);
+}
+void tryBalance(struct node* tempNode){
+    if(tempNode==NULL)
+        return;
+    tryBalance(tempNode->left);
+    printf("%d, ",balance(tempNode));
+    tryBalance(tempNode->right);
 }
 int main(){
     int rootValue;
@@ -154,7 +177,7 @@ int main(){
                 scanf("%d",&inputValue);
                 switch (inputValue){
                     case 1:
-                        inorder(root);
+                        tryBalance(root);
                         printf("\n");
                         break;
                     case 2:
