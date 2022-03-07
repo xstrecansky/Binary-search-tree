@@ -5,7 +5,6 @@ struct node{
     int data;
     struct node* left;
     struct node* right;
-    int height;
 };
 //Allokujeme pamat pre prvok 
 //a nastavime jeho hodnoty na NULL, pretoze to je list
@@ -15,7 +14,6 @@ struct node* createNode(int value){
         newNode->data = value;
         newNode->left = NULL;
         newNode->right = NULL;
-        newNode->height = 0;
     }
     return newNode;
 }
@@ -54,7 +52,6 @@ void insertion(struct node** root, int addedData){
     else if(addedData>(*root)->data){
         return insertion(&((*root)->right), addedData);
     }
-    
 }
 //Funkcia na najdenie prvku v strome
 struct node* search(struct node* root, int searchedNumber){
@@ -117,6 +114,26 @@ struct node* delete(struct node* root, int dataToDelete){
         }
     }
     return root;
+}
+struct node* rightRotate(struct node* A){
+    struct node* B = A->right;
+    A->right=B->left;
+    B->left=A;
+    return B;
+}
+struct node* leftRotate(struct node* A){
+    struct node* B=A->left;
+    A->left=B->right;
+    B->right=A;
+    return B;
+}
+struct node* rotateRL(struct node* A){
+    A->right = rightRotate(A->right);
+    return leftRotate(A);
+}
+stuct node* rotateLR(struct node* A){
+    A->left = leftRotate(A->left);
+    return rightRotate(A);
 }
 int main(){
     int rootValue;
