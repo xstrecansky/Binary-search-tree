@@ -149,14 +149,17 @@ int getHeight(struct node* root, int height){
     return answer;
 }
 int balance(struct node* root){
+    if(root==NULL)
+        return 0;
     return getHeight(root->left,0)-getHeight(root->right,0);
 }
-void tryBalance(struct node* tempNode){
+//Funkcia vypise vyvazenie kazdeho prvku
+void printBalance(struct node* tempNode){
     if(tempNode==NULL)
         return;
-    tryBalance(tempNode->left);
+    printBalance(tempNode->left);
     printf("%d, ",balance(tempNode));
-    tryBalance(tempNode->right);
+    printBalance(tempNode->right);
 }
 int main(){
     int rootValue;
@@ -177,13 +180,27 @@ int main(){
                 scanf("%d",&inputValue);
                 switch (inputValue){
                     case 1:
-                        tryBalance(root);
+                        inorder(root);
                         printf("\n");
                         break;
                     case 2:
                         scanf("%d",&deleteValue);
                         delete(root, deleteValue);
                         printf("Hodnota bola vymazana\n");
+                        int balanceRoot = balance(root);
+                        //TODO:
+                        if (balanceRoot > 1 && balance(root->left) >= 0){
+                            rightRotate(root);
+                        }
+                        if (balanceRoot < -1 && balance(root->right) <=0){
+                            leftRotate(root);
+                        }
+                        if (balanceRoot > 1 && balance(root->left) < 0){
+                            rotateLR(root);
+                        }
+                        if (balanceRoot < -1 && balance(root->left) > 0){
+                            rotateRL(root);
+                        }
                         break;
                     case 3:
                         scanf("%d",&searchValue);
