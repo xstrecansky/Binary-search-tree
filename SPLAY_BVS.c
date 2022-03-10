@@ -1,28 +1,12 @@
 #include<stdio.h>
 #include<stdlib.h>
-
-#define COUNT 10
+#include<time.h>
 //Definujeme prvok BVS
 struct node{
     int data;
     struct node* left;
     struct node* right;
 };
-void print2DUtil(struct node *root, int space){
-    if (root == NULL)
-        return;
-    space += COUNT;
-    print2DUtil(root->right, space);
-    printf("\n");
-    for (int i = COUNT; i < space; i++)
-        printf(" ");
-    printf("%d\n",root->data);
-    print2DUtil(root->left, space);
-}
-void print2D(struct node *root)
-{
-    print2DUtil(root, 0);
-}
 struct node* splay(struct node** root, int searchedValue);
 //Allokujeme pamat pre prvok 
 //a nastavime jeho hodnoty na NULL, pretoze to je list
@@ -49,8 +33,8 @@ void freeTree(struct node* tempNode){
     if(tempNode==NULL)
         return;
     freeTree(tempNode->left);
-    free(tempNode);
     freeTree(tempNode->right);
+    free(tempNode);
 }
 //funkcia na pridanie elementu do binarneho stromu
 void insertion(struct node** root, int addedData){
@@ -174,11 +158,55 @@ struct node* splay(struct node** root, int data){
     }
 }
 int main(){
-    int rootValue;
-    int inputValue;
-    int deleteValue;
-    int searchValue;
-    int i=0,j=0;
+    printf("Ak chces testovat O(n) stlac 1\n");
+    int test;
+    scanf("%d",&test);
+    if(test == 1){
+        clock_t start;
+        double time;
+        int value;
+        struct node* root;
+        printf("Casova zlozitost SPLAY BVS:\n\n");
+        printf("Pocet Prvkov\t\t|Insert\t\t|Search\t\t|Delete\n");
+        for(int i=1;i<=10;i++){
+            printf("------------------------+---------------+---------------+--------\n");
+            root = createNode(500*i);
+            printf("%d\t\t\t", (1000*i));
+            start=clock();
+            //Testujeme insert
+            for(int j=0;j<(1000*i);j++){
+                value = (random()%(1000*i));
+                insertion(&root,value);
+                root = splay(&root, value);
+            }
+            time=(clock()-start)/(double)CLOCKS_PER_SEC;
+            printf("|%f\t",time);
+            //Testujeme search
+            start=clock();
+            for(int j=0;j<(1000*i);j++){
+                value =(random()%(1000*i));
+                search(root, value);
+                root = splay(&root, value);
+            }
+            time=(clock()-start)/(double)CLOCKS_PER_SEC;
+            printf("|%f\t",time);
+            //Testujeme delete
+            start=clock();
+            for(int j=0;j<(1000*i);j++){
+                value = (random()%(1000*i));
+                delete(root,value);
+                root = splay(&root, value);
+            }
+            time=(clock()-start)/(double)CLOCKS_PER_SEC;
+            printf("|%f\n",time);
+            //Uvolnime pamat
+            freeTree(root);
+            root=NULL;
+        }
+        printf("-----------------------------------------------------------------\n");
+        return 0;
+    }
+    int rootValue, inputValue, deleteValue, searchValue, i=0, j=0;
     printf("Vloz hodnotu hlavicky binarneho stromu\n");
     scanf("%d",&rootValue);
     struct node* root = createNode(rootValue);
@@ -220,7 +248,6 @@ int main(){
         }
         insertion(&root,inputValue);
         root = splay(&root, inputValue);
-        print2D(root);
     }
     freeTree(root);
     return 0;
