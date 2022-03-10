@@ -1,11 +1,28 @@
 #include<stdio.h>
 #include<stdlib.h>
+
+#define COUNT 10
 //Definujeme prvok BVS
 struct node{
     int data;
     struct node* left;
     struct node* right;
 };
+void print2DUtil(struct node *root, int space){
+    if (root == NULL)
+        return;
+    space += COUNT;
+    print2DUtil(root->right, space);
+    printf("\n");
+    for (int i = COUNT; i < space; i++)
+        printf(" ");
+    printf("%d\n",root->data);
+    print2DUtil(root->left, space);
+}
+void print2D(struct node *root)
+{
+    print2DUtil(root, 0);
+}
 //Allokujeme pamat pre prvok 
 //a nastavime jeho hodnoty na NULL, pretoze to je list
 struct node* createNode(int value){
@@ -17,6 +34,7 @@ struct node* createNode(int value){
     }
     return newNode;
 }
+
 //Ako vstup vkladame hlavicku BVS
 //funkcia vypise hodnoty zoradene od najmensieho po najvacsi
 void inorder(struct node* tempNode){
@@ -25,13 +43,6 @@ void inorder(struct node* tempNode){
     inorder(tempNode->left);
     printf("%d, ",tempNode->data);
     inorder(tempNode->right);
-}
-void preorder(struct node* tempNode){
-    if(tempNode==NULL)
-        return;
-    printf("%d, ",tempNode->data);
-    preorder(tempNode->left);
-    preorder(tempNode->right);
 }
 //Rekurzivne prejdeme kazdy prvok a uvolnime ho z pamate
 void freeTree(struct node* tempNode){
@@ -203,7 +214,7 @@ int main(){
                 scanf("%d",&inputValue);
                 switch (inputValue){
                     case 1:
-                        preorder(root);
+                        inorder(root);
                         printf("\n");
                         break;
                     case 2:
@@ -230,9 +241,8 @@ int main(){
             }
         }
         insertion(&root,inputValue);
-        tryBalance(&root);
-        preorder(root);
-        printf("\n");
+        tryBalance(&root);;
+        print2D(root);
     }
     freeTree(root);
     return 0;
