@@ -26,6 +26,13 @@ void inorder(struct node* tempNode){
     printf("%d, ",tempNode->data);
     inorder(tempNode->right);
 }
+void preorder(struct node* tempNode){
+    if(tempNode==NULL)
+        return;
+    printf("%d, ",tempNode->data);
+    preorder(tempNode->left);
+    preorder(tempNode->right);
+}
 //Rekurzivne prejdeme kazdy prvok a uvolnime ho z pamate
 void freeTree(struct node* tempNode){
     if(tempNode==NULL)
@@ -116,15 +123,15 @@ struct node* delete(struct node* root, int dataToDelete){
     return root;
 }
 struct node* rightRotate(struct node* A){
-    struct node* B = A->right;
-    A->right=B->left;
-    B->left=A;
-    return B;
-}
-struct node* leftRotate(struct node* A){
     struct node* B=A->left;
     A->left=B->right;
     B->right=A;
+    return B;
+}
+struct node* leftRotate(struct node* A){
+    struct node* B = A->right;
+    A->right=B->left;
+    B->left=A;
     return B;
 }
 struct node* rotateRL(struct node* A){
@@ -154,12 +161,28 @@ int balance(struct node* root){
     return getHeight(root->left,0)-getHeight(root->right,0);
 }
 //Funkcia vypise vyvazenie kazdeho prvku
-void printBalance(struct node* tempNode){
-    if(tempNode==NULL)
+void tryBalance(struct node** root){
+    if((*root)==NULL)
         return;
-    printBalance(tempNode->left);
-    printf("%d, ",balance(tempNode));
-    printBalance(tempNode->right);
+    int balanceRoot = balance((*root));
+    if (balanceRoot > 1 && balance((*root)->left) >= 0){
+        *root = rightRotate(*root);
+        return;
+    }
+    if (balanceRoot < -1 && balance((*root)->right) <= 0){
+        *root = leftRotate(*root);
+        return;
+    }
+    if (balanceRoot > 1 && balance((*root)->left) <= 0){
+        *root = rotateLR(*root);
+        return;
+    }
+    if (balanceRoot < -1 && balance((*root)->left) >= 0){
+        *root = rotateRL(*root);
+        return;
+    }
+    tryBalance(&(*root)->left);
+    tryBalance(&(*root)->right);
 }
 int main(){
     int rootValue;
@@ -180,27 +203,14 @@ int main(){
                 scanf("%d",&inputValue);
                 switch (inputValue){
                     case 1:
-                        inorder(root);
+                        preorder(root);
                         printf("\n");
                         break;
                     case 2:
                         scanf("%d",&deleteValue);
                         delete(root, deleteValue);
+                        tryBalance(&root);
                         printf("Hodnota bola vymazana\n");
-                        int balanceRoot = balance(root);
-                        //TODO:
-                        if (balanceRoot > 1 && balance(root->left) >= 0){
-                            rightRotate(root);
-                        }
-                        if (balanceRoot < -1 && balance(root->right) <=0){
-                            leftRotate(root);
-                        }
-                        if (balanceRoot > 1 && balance(root->left) < 0){
-                            rotateLR(root);
-                        }
-                        if (balanceRoot < -1 && balance(root->left) > 0){
-                            rotateRL(root);
-                        }
                         break;
                     case 3:
                         scanf("%d",&searchValue);
@@ -220,6 +230,9 @@ int main(){
             }
         }
         insertion(&root,inputValue);
+        tryBalance(&root);
+        preorder(root);
+        printf("\n");
     }
     freeTree(root);
     return 0;
