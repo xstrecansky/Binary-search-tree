@@ -1,12 +1,29 @@
 #include<stdio.h>
 #include<stdlib.h>
+
+#define COUNT 10
 //Definujeme prvok BVS
 struct node{
     int data;
     struct node* left;
     struct node* right;
-    //int height;
 };
+void print2DUtil(struct node *root, int space){
+    if (root == NULL)
+        return;
+    space += COUNT;
+    print2DUtil(root->right, space);
+    printf("\n");
+    for (int i = COUNT; i < space; i++)
+        printf(" ");
+    printf("%d\n",root->data);
+    print2DUtil(root->left, space);
+}
+void print2D(struct node *root)
+{
+    print2DUtil(root, 0);
+}
+struct node* splay(struct node** root, int searchedValue);
 //Allokujeme pamat pre prvok 
 //a nastavime jeho hodnoty na NULL, pretoze to je list
 struct node* createNode(int value){
@@ -15,7 +32,6 @@ struct node* createNode(int value){
         newNode->data = value;
         newNode->left = NULL;
         newNode->right = NULL;
-        //newNode->height = 0;
     }
     return newNode;
 }
@@ -58,12 +74,7 @@ void insertion(struct node** root, int addedData){
 }
 //Funkcia na najdenie prvku v strome
 struct node* search(struct node* root, int searchedNumber){
-    if(root==NULL||(root->data==searchedNumber))
-        return root;
-    if(root->data>searchedNumber){
-        return search((root->left), searchedNumber);
-    }
-    return search((root->right), searchedNumber);
+    return splay(&root, searchedNumber);
 }
 //Funkcia, ktora nam vrati rodica podla vstupnej hodnoty
 struct node* getParentNode(struct node* root, int value){
@@ -119,19 +130,48 @@ struct node* delete(struct node* root, int dataToDelete){
     return root;
 }
 struct node* rightRH(struct node* A){
-    struct node* B = A->right;
-    A->right=B->left;
-    B->left=A;
-    return B;
-}
-struct node* leftLH(struct node* A){
     struct node* B=A->left;
     A->left=B->right;
     B->right=A;
     return B;
 }
-struct node* rotateRL(struct node* A){
-    //A->right= 
+struct node* leftLH(struct node* A){
+    struct node* B = A->right;
+    A->right=B->left;
+    B->left=A;
+    return B;
+}
+struct node* splay(struct node** root, int data){
+    if((*root)==NULL || (*root)->data==data)
+        return (*root);
+    if((*root)->data>data){
+        if((*root)->left==NULL)
+            return (*root);
+        if((*root)->left->data>data){
+            (*root)->left->left=splay(&(*root)->left->left, data);
+            (*root)=rightRH((*root));
+        }
+        else if((*root)->left->data<data){
+            (*root)->left->right = splay(&(*root)->left->right, data);
+            if ((*root)->left->right != NULL)
+                (*root)->left = leftLH((*root)->left);
+        }
+        return ((*root)->left == NULL)? (*root): rightRH((*root));
+    }
+    else{
+        if ((*root)->right == NULL)
+            return (*root);
+        if ((*root)->right->data > data){
+            (*root)->right->left = splay(&(*root)->right->left, data);
+            if ((*root)->right->left != NULL)
+                (*root)->right = rightRH((*root)->right);
+        }
+        else if ((*root)->right->data < data){
+            (*root)->right->right = splay(&(*root)->right->right, data);
+            (*root) = leftLH((*root));
+        }
+        return ((*root)->right == NULL)? (*root): leftLH((*root));
+    }
 }
 int main(){
     int rootValue;
@@ -158,11 +198,12 @@ int main(){
                     case 2:
                         scanf("%d",&deleteValue);
                         delete(root, deleteValue);
+                        root = splay(&root, deleteValue);
                         printf("Hodnota %d bola vymazana\n", deleteValue);
                         break;
                     case 3:
                         scanf("%d",&searchValue);
-                        if(search(root, searchValue))
+                        if((root = search(root, searchValue)))
                             printf("Hodnota %d sa nachadza v stome\n",searchValue);
                         else
                             printf("Hodnota %d sa nenachadza v strome\n",searchValue);
@@ -178,6 +219,8 @@ int main(){
             }
         }
         insertion(&root,inputValue);
+        root = splay(&root, inputValue);
+        print2D(root);
     }
     freeTree(root);
     return 0;
