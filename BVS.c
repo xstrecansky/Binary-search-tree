@@ -1,11 +1,29 @@
 #include<stdio.h>
 #include<stdlib.h>
+
+#define COUNT 10
 //Definujeme prvok BVS
 struct node{
     int data;
     struct node* left;
     struct node* right;
+    int height;
 };
+void print2DUtil(struct node *root, int space){
+    if (root == NULL)
+        return;
+    space += COUNT;
+    print2DUtil(root->right, space);
+    printf("\n");
+    for (int i = COUNT; i < space; i++)
+        printf(" ");
+    printf("%d\n",root->data);
+    print2DUtil(root->left, space);
+}
+void print2D(struct node *root)
+{
+    print2DUtil(root, 0);
+}
 //Allokujeme pamat pre prvok 
 //a nastavime jeho hodnoty na NULL, pretoze to je list
 struct node* createNode(int value){
@@ -76,6 +94,12 @@ struct node* getParentNode(struct node* root, int value){
     parent = getParentNode(root->right, value);
     return parent;
 }
+//Funkcia na vratenie najmensej hodnoty pod vstupnou hodndotou
+struct node* minValue(struct node* searchedNode){
+    while(searchedNode && searchedNode->left !=NULL)
+        searchedNode=searchedNode->left;
+    return searchedNode;
+}
 //Vymazeme hodnotu v strome podla vstupnej hodnoty
 struct node* delete(struct node* root, int dataToDelete){
     if(root==NULL)
@@ -102,18 +126,12 @@ struct node* delete(struct node* root, int dataToDelete){
             return temp;
         }
         else{
-            struct node *temp = minValue(root->right);
+            struct node* temp = minValue(root->right);
             root->data = temp->data;
             root->right = delete(root->right, temp->data);
         }
     }
     return root;
-}
-//Funkcia na vratenie najmensej hodnoty pod vstupnou hodndotou
-struct node* minValue(struct node* searchedNode){
-    while(searchedNode && searchedNode->left !=NULL)
-        searchedNode=searchedNode->left;
-    return searchedNode;
 }
 int main(){
     int rootValue;
@@ -160,6 +178,7 @@ int main(){
             }
         }
         insertion(&root,inputValue);
+        print2D(root);
     }
     freeTree(root);
     return 0;
