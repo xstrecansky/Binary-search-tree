@@ -1,12 +1,30 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+
+#define COUNT 10
 //Definujeme prvok BVS
 struct node{
     int data;
     struct node* left;
     struct node* right;
+    int height;
 };
+void print2DUtil(struct node *root, int space){
+    if (root == NULL)
+        return;
+    space += COUNT;
+    print2DUtil(root->right, space);
+    printf("\n");
+    for (int i = COUNT; i < space; i++)
+        printf(" ");
+    printf("%d\n",root->data);
+    print2DUtil(root->left, space);
+}
+void print2D(struct node *root)
+{
+    print2DUtil(root, 0);
+}
 struct node* splay(struct node** root, int searchedValue);
 //Allokujeme pamat pre prvok 
 //a nastavime jeho hodnoty na NULL, pretoze to je list
@@ -37,24 +55,28 @@ void freeTree(struct node* tempNode){
     free(tempNode);
 }
 //funkcia na pridanie elementu do binarneho stromu
-void insertion(struct node** root, int addedData){
-    if((*root) == NULL){
+struct node* insertion(struct node* root, int addedData){
+    if((root) == NULL){
         //Ak je hlavicka prazdna nastavime jej hodnotu
-        (*root) = createNode(addedData);
-        return;
+        return (root) = createNode(addedData);
     }
+    root = splay(&(root), addedData);
     //Ak sa hodnota uz nachadza v strome, nic sa nestane
-    if(addedData==(*root)->data){
-        return;
+    if(addedData==(root)->data){
+        return root;
     }
-    //Rekurzivne prechadzame prvky stromu podla < >
-    if(addedData<(*root)->data){
-        return insertion(&((*root)->left), addedData);
+    struct node *tempNode = createNode(addedData);
+    if ((root)->data > addedData){
+        tempNode->right = (root);
+        tempNode->left = (root)->left;
+        (root)->left = NULL;
     }
-    else if(addedData>(*root)->data){
-        return insertion(&((*root)->right), addedData);
+    else{
+        tempNode->left = (root);
+        tempNode->right = (root)->right;
+        (root)->right = NULL;
     }
-    
+    return tempNode;    
 }
 //Funkcia na najdenie prvku v strome
 struct node* search(struct node* root, int searchedNumber){
@@ -113,19 +135,28 @@ struct node* delete(struct node* root, int dataToDelete){
     }
     return root;
 }
-struct node* rightRH(struct node* A){
+struct node* rightRotate(struct node* A){
     struct node* B=A->left;
     A->left=B->right;
     B->right=A;
     return B;
 }
-struct node* leftLH(struct node* A){
+struct node* leftRotate(struct node* A){
     struct node* B = A->right;
     A->right=B->left;
     B->left=A;
     return B;
 }
+struct node* rotateRL(struct node* A){
+    A->right = rightRotate(A->right);
+    return leftRotate(A);
+}
+struct node* rotateLR(struct node* A){
+    A->left = leftRotate(A->left);
+    return rightRotate(A);
+}
 struct node* splay(struct node** root, int data){
+    //Ak je prazdna hlavicka alebo je hladana hodnota v hlavicke
     if((*root)==NULL || (*root)->data==data)
         return (*root);
     if((*root)->data>data){
@@ -133,14 +164,14 @@ struct node* splay(struct node** root, int data){
             return (*root);
         if((*root)->left->data>data){
             (*root)->left->left=splay(&(*root)->left->left, data);
-            (*root)=rightRH((*root));
+            (*root)=rightRotate((*root));
         }
         else if((*root)->left->data<data){
             (*root)->left->right = splay(&(*root)->left->right, data);
             if ((*root)->left->right != NULL)
-                (*root)->left = leftLH((*root)->left);
+                (*root)->left = leftRotate((*root)->left);
         }
-        return ((*root)->left == NULL)? (*root): rightRH((*root));
+        return ((*root)->left == NULL)? (*root): rightRotate((*root));
     }
     else{
         if ((*root)->right == NULL)
@@ -148,64 +179,16 @@ struct node* splay(struct node** root, int data){
         if ((*root)->right->data > data){
             (*root)->right->left = splay(&(*root)->right->left, data);
             if ((*root)->right->left != NULL)
-                (*root)->right = rightRH((*root)->right);
+                (*root)->right = rightRotate((*root)->right);
         }
         else if ((*root)->right->data < data){
             (*root)->right->right = splay(&(*root)->right->right, data);
-            (*root) = leftLH((*root));
+            (*root) = leftRotate((*root));
         }
-        return ((*root)->right == NULL)? (*root): leftLH((*root));
+        return ((*root)->right == NULL)? (*root): leftRotate((*root));
     }
 }
 int main(){
-    printf("Ak chces testovat O(n) stlac 1\n");
-    int test;
-    scanf("%d",&test);
-    if(test == 1){
-        clock_t start;
-        double time;
-        int value;
-        struct node* root;
-        printf("Casova zlozitost SPLAY BVS:\n\n");
-        printf("Pocet Prvkov\t\t|Insert\t\t|Search\t\t|Delete\n");
-        for(int i=1;i<=10;i++){
-            printf("------------------------+---------------+---------------+--------\n");
-            root = createNode(500*i);
-            printf("%d\t\t\t", (1000*i));
-            start=clock();
-            //Testujeme insert
-            for(int j=0;j<(1000*i);j++){
-                value = (random()%(1000*i));
-                insertion(&root,value);
-                root = splay(&root, value);
-            }
-            time=(clock()-start)/(double)CLOCKS_PER_SEC;
-            printf("|%f\t",time);
-            //Testujeme search
-            start=clock();
-            for(int j=0;j<(1000*i);j++){
-                value =(random()%(1000*i));
-                search(root, value);
-                root = splay(&root, value);
-            }
-            time=(clock()-start)/(double)CLOCKS_PER_SEC;
-            printf("|%f\t",time);
-            //Testujeme delete
-            start=clock();
-            for(int j=0;j<(1000*i);j++){
-                value = (random()%(1000*i));
-                delete(root,value);
-                root = splay(&root, value);
-            }
-            time=(clock()-start)/(double)CLOCKS_PER_SEC;
-            printf("|%f\n",time);
-            //Uvolnime pamat
-            freeTree(root);
-            root=NULL;
-        }
-        printf("-----------------------------------------------------------------\n");
-        return 0;
-    }
     int rootValue, inputValue, deleteValue, searchValue, i=0, j=0;
     printf("Vloz hodnotu hlavicky binarneho stromu\n");
     scanf("%d",&rootValue);
@@ -225,9 +208,13 @@ int main(){
                         break;
                     case 2:
                         scanf("%d",&deleteValue);
+                        print2D(root);
                         delete(root, deleteValue);
-                        root = splay(&root, deleteValue);
+                        print2D(root);
+                        struct node* parent = getParentNode(root, deleteValue);
+                        root = splay(&parent, parent->data);
                         printf("Hodnota %d bola vymazana\n", deleteValue);
+                        print2D(root);
                         break;
                     case 3:
                         scanf("%d",&searchValue);
@@ -246,8 +233,8 @@ int main(){
                 }
             }
         }
-        insertion(&root,inputValue);
-        root = splay(&root, inputValue);
+        root = insertion(root,inputValue);
+        print2D(root);
     }
     freeTree(root);
     return 0;
