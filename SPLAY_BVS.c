@@ -25,7 +25,7 @@ void print2D(struct node *root)
 {
     print2DUtil(root, 0);
 }
-struct node* splay(struct node** root, int searchedValue);
+struct node* splay(struct node* root, int searchedValue);
 //Allokujeme pamat pre prvok 
 //a nastavime jeho hodnoty na NULL, pretoze to je list
 struct node* createNode(int value){
@@ -55,32 +55,27 @@ void freeTree(struct node* tempNode){
     free(tempNode);
 }
 //funkcia na pridanie elementu do binarneho stromu
-struct node* insertion(struct node* root, int addedData){
-    if((root) == NULL){
+void insertion(struct node** root, int addedData){
+    if((*root) == NULL){
         //Ak je hlavicka prazdna nastavime jej hodnotu
-        return (root) = createNode(addedData);
+        (*root) = createNode(addedData);
+        return;
     }
-    root = splay(&(root), addedData);
     //Ak sa hodnota uz nachadza v strome, nic sa nestane
-    if(addedData==(root)->data){
-        return root;
+    if(addedData==(*root)->data){
+        return;
     }
-    struct node *tempNode = createNode(addedData);
-    if ((root)->data > addedData){
-        tempNode->right = (root);
-        tempNode->left = (root)->left;
-        (root)->left = NULL;
+    //Rekurzivne prechadzame prvky stromu podla < >
+    if(addedData<(*root)->data){
+        return insertion(&((*root)->left), addedData);
     }
-    else{
-        tempNode->left = (root);
-        tempNode->right = (root)->right;
-        (root)->right = NULL;
+    else if(addedData>(*root)->data){
+        return insertion(&((*root)->right), addedData);
     }
-    return tempNode;    
 }
 //Funkcia na najdenie prvku v strome
 struct node* search(struct node* root, int searchedNumber){
-    return splay(&root, searchedNumber);
+    return splay(root, searchedNumber);
 }
 //Funkcia, ktora nam vrati rodica podla vstupnej hodnoty
 struct node* getParentNode(struct node* root, int value){
@@ -147,45 +142,45 @@ struct node* leftRotate(struct node* A){
     B->left=A;
     return B;
 }
-struct node* rotateRL(struct node* A){
-    A->right = rightRotate(A->right);
-    return leftRotate(A);
-}
-struct node* rotateLR(struct node* A){
-    A->left = leftRotate(A->left);
-    return rightRotate(A);
-}
-struct node* splay(struct node** root, int data){
+struct node* splay(struct node* root, int data){
     //Ak je prazdna hlavicka alebo je hladana hodnota v hlavicke
-    if((*root)==NULL || (*root)->data==data)
-        return (*root);
-    if((*root)->data>data){
-        if((*root)->left==NULL)
-            return (*root);
-        if((*root)->left->data>data){
-            (*root)->left->left=splay(&(*root)->left->left, data);
-            (*root)=rightRotate((*root));
+    if(root==NULL || root->data==data)
+        return root;
+    //Pripad kedy je hladany prvok v pravej casti
+    if(root->data>data){
+        if(root->left==NULL)
+            return root;
+        if(root->left->data>data){
+            root->left->left=splay(root->left->left, data);
+            root=rightRotate(root);
         }
-        else if((*root)->left->data<data){
-            (*root)->left->right = splay(&(*root)->left->right, data);
-            if ((*root)->left->right != NULL)
-                (*root)->left = leftRotate((*root)->left);
+        else if(root->left->data<data){
+            root->left->right = splay(root->left->right, data);
+            if (root->left->right != NULL)
+                root->left = leftRotate(root->left);
         }
-        return ((*root)->left == NULL)? (*root): rightRotate((*root));
+        if(root->left == NULL)
+            return root;
+        else
+            return rightRotate(root);
     }
+    //Pripad kedy je hladany prvok v lavej casti
     else{
-        if ((*root)->right == NULL)
-            return (*root);
-        if ((*root)->right->data > data){
-            (*root)->right->left = splay(&(*root)->right->left, data);
-            if ((*root)->right->left != NULL)
-                (*root)->right = rightRotate((*root)->right);
+        if(root->right == NULL)
+            return root;
+        if (root->right->data > data){
+            root->right->left = splay(root->right->left, data);
+            if (root->right->left != NULL)
+                root->right = rightRotate(root->right);
         }
-        else if ((*root)->right->data < data){
-            (*root)->right->right = splay(&(*root)->right->right, data);
-            (*root) = leftRotate((*root));
+        else if (root->right->data < data){
+            root->right->right = splay(root->right->right, data);
+            root = leftRotate(root);
         }
-        return ((*root)->right == NULL)? (*root): leftRotate((*root));
+        if (root->right == NULL)
+            return root;
+        else
+            return leftRotate(root);
     }
 }
 int main(){
@@ -208,13 +203,10 @@ int main(){
                         break;
                     case 2:
                         scanf("%d",&deleteValue);
-                        print2D(root);
-                        delete(root, deleteValue);
-                        print2D(root);
                         struct node* parent = getParentNode(root, deleteValue);
-                        root = splay(&parent, parent->data);
+                        delete(root, deleteValue);  
+                        root = splay(root, parent->data);
                         printf("Hodnota %d bola vymazana\n", deleteValue);
-                        print2D(root);
                         break;
                     case 3:
                         scanf("%d",&searchValue);
@@ -233,7 +225,8 @@ int main(){
                 }
             }
         }
-        root = insertion(root,inputValue);
+        insertion(&root,inputValue);
+        root = splay(root, inputValue);
         print2D(root);
     }
     freeTree(root);
