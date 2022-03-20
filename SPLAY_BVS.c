@@ -75,7 +75,12 @@ void insertion(struct node** root, int addedData){
 }
 //Funkcia na najdenie prvku v strome
 struct node* search(struct node* root, int searchedNumber){
-    return splay(root, searchedNumber);
+    if(root==NULL||(root->data==searchedNumber))
+        return root;
+    if(root->data>searchedNumber){
+        return search((root->left), searchedNumber);
+    }
+    return search((root->right), searchedNumber);
 }
 //Funkcia, ktora nam vrati rodica podla vstupnej hodnoty
 struct node* getParentNode(struct node* root, int value){
@@ -130,12 +135,14 @@ struct node* delete(struct node* root, int dataToDelete){
     }
     return root;
 }
+///----->
 struct node* rightRotate(struct node* A){
     struct node* B=A->left;
     A->left=B->right;
     B->right=A;
     return B;
 }
+///<-------
 struct node* leftRotate(struct node* A){
     struct node* B = A->right;
     A->right=B->left;
@@ -143,45 +150,49 @@ struct node* leftRotate(struct node* A){
     return B;
 }
 struct node* splay(struct node* root, int data){
-    //Ak je prazdna hlavicka alebo je hladana hodnota v hlavicke
-    if(root==NULL || root->data==data)
-        return root;
-    //Pripad kedy je hladany prvok v pravej casti
-    if(root->data>data){
-        if(root->left==NULL)
-            return root;
-        if(root->left->data>data){
-            root->left->left=splay(root->left->left, data);
-            root=rightRotate(root);
-        }
-        else if(root->left->data<data){
-            root->left->right = splay(root->left->right, data);
-            if (root->left->right != NULL)
+    while(root->data!=data){
+        //Ak je prazdna hlavicka alebo je hladana hodnota v hlavicke
+        if(root==NULL || root->data==data)
+            continue;
+        //Pripad kedy je hladany prvok v pravej casti
+        if(root->data>data){
+            if(root->left==NULL)
+                continue;
+            //ZIG rotacia
+            if(root->left->data==data){
+                root = rightRotate(root);
+            }
+            //ZIG-ZIG rotacia
+            else if(root->left->data>data){
+                root = rightRotate(root);
+                root = rightRotate(root);
+            }
+            //ZIG-ZAG rotacia
+            else{
                 root->left = leftRotate(root->left);
+                root = rightRotate(root);
+            }
         }
-        if(root->left == NULL)
-            return root;
-        else
-            return rightRotate(root);
-    }
-    //Pripad kedy je hladany prvok v lavej casti
-    else{
-        if(root->right == NULL)
-            return root;
-        if (root->right->data > data){
-            root->right->left = splay(root->right->left, data);
-            if (root->right->left != NULL)
+        //Pripad kedy je hladany prvok v lavej casti
+        else{
+            if(root->right==NULL)
+                continue;
+            //ZAG rotacia
+            if(root->right->data==data){
+                root = leftRotate(root);
+            }
+            //ZAG-ZAG rotacia
+            else if(root->right->data<data){
+                root = leftRotate(root);
+                root = leftRotate(root);
+            }
+            else{
                 root->right = rightRotate(root->right);
+                root = leftRotate(root);
+            }
         }
-        else if (root->right->data < data){
-            root->right->right = splay(root->right->right, data);
-            root = leftRotate(root);
-        }
-        if (root->right == NULL)
-            return root;
-        else
-            return leftRotate(root);
     }
+    return root;
 }
 int main(){
     int rootValue, inputValue, deleteValue, searchValue, i=0, j=0;
@@ -210,8 +221,10 @@ int main(){
                         break;
                     case 3:
                         scanf("%d",&searchValue);
-                        if((root = search(root, searchValue)))
+                        if((search(root, searchValue))){
                             printf("Hodnota %d sa nachadza v stome\n",searchValue);
+                            root = splay(root, searchValue);
+                        }
                         else
                             printf("Hodnota %d sa nenachadza v strome\n",searchValue);
                         break;
