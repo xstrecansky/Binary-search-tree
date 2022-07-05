@@ -197,49 +197,6 @@ void tryBalance(struct node** root){
     tryBalance(&(*root)->right);
 }
 int main(){
-    printf("Ak chces testovat O(n) stlac 1\n");
-    int test;
-    scanf("%d",&test);
-    if(test == 1){
-        clock_t start;
-        double time;
-        struct node* root;
-        printf("Casova zlozitost AVL BVS:\n\n");
-        printf("Pocet Prvkov\t\t|Insert\t\t|Search\t\t|Delete\n");
-        for(int i=1;i<=10;i++){
-            printf("-----------------------------------------------------------------\n");
-            root = createNode(500*i);
-            printf("%d\t\t\t", (1000*i));
-            start=clock();
-            //Testujeme insert
-            for(int j=0;j<(1000*i);j++){
-                insertion(&root,(random()%(1000*i)));
-                tryBalance(&root);
-            }
-            time=(clock()-start)/(double)CLOCKS_PER_SEC;
-            printf("|%f\t",time);
-            //Testujeme search
-            start=clock();
-            for(int j=0;j<(1000*i);j++){
-                search(root,(random()%(1000*i)));
-            }
-            time=(clock()-start)/(double)CLOCKS_PER_SEC;
-            printf("|%f\t",time);
-            //Testujeme delete
-            start=clock();
-            for(int j=0;j<(1000*i);j++){
-                delete(root,(random()%(1000*i)));
-                tryBalance(&root);
-            }
-            time=(clock()-start)/(double)CLOCKS_PER_SEC;
-            printf("|%f\n",time);
-            //Uvolnime pamat
-            freeTree(root);
-            root=NULL;
-        }
-        printf("-----------------------------------------------------------------\n");
-        return 0;
-    }
     int rootValue, inputValue, deleteValue, searchValue, i=0, j=0;
     printf("Vloz hodnotu hlavicky binarneho stromu\n");
     scanf("%d",&rootValue);
